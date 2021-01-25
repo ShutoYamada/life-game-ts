@@ -1,9 +1,14 @@
 import React from "react";
 import Cell from "./Cell";
 import CellInfo from "../modules/CellInfo";
-import { generateRandomActiveCellPoint } from "../utils/CellUtil";
+import {
+  generateRandomActiveCellPoint,
+  nextGeneration,
+} from "../utils/CellUtil";
 
 type State = {
+  // 実行中
+  isRunning: boolean;
   // 行数
   rowCount: number;
   // 初期のアクティブセル数
@@ -17,8 +22,9 @@ class Board extends React.Component<{}, State> {
     super(props);
 
     this.state = {
-      rowCount: 8,
-      defaultActiveCount: 12,
+      isRunning: false,
+      rowCount: 25,
+      defaultActiveCount: 100,
       cellRowList: [],
     };
   }
@@ -59,11 +65,30 @@ class Board extends React.Component<{}, State> {
     });
   };
 
+  /**
+   * スタートボタン押下処理
+   */
+  onPressStartButton = () => {
+    // 0.5秒間隔で盤面全体の世代を進める
+    setInterval(this.next, 500);
+  };
+
+  // 盤面全体の世代を進める
+  next = () => {
+    const { cellRowList } = this.state;
+    // 次世代の盤面状態を生成
+    const nextCellRowList = nextGeneration(cellRowList);
+
+    this.setState({
+      cellRowList: nextCellRowList,
+    });
+  };
+
   render = () => {
     const { cellRowList } = this.state;
     return (
       <div style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <button>Start</button>
+        <button onClick={this.onPressStartButton}>Start</button>
         <div style={{ margin: "2% auto auto auto" }}>
           {cellRowList.map((row: CellInfo[], index: number) => {
             return (
